@@ -19,6 +19,7 @@ from apps.creators.models import CreatorDevice, CreatorStatus
 from apps.integrations import services as integration_services
 from apps.integrations.tiktok import TikTokError
 from apps.ledger import services as ledger
+from apps.legal import documents as legal
 from apps.receiving import services as receiving
 from apps.withdrawals import services as withdrawal_services
 from apps.withdrawals.models import WithdrawalRequest
@@ -198,6 +199,10 @@ class CreatorMeView(APIView):
             "preferred_language": creator.preferred_language,
             "setup_completed": bool(assignment and assignment.autofilled_at),
             "balance_egp": ledger.creator_balance(creator.id),
+            "legal": {
+                "terms": legal.descriptor(legal.TERMS, creator.preferred_language),
+                "privacy": legal.descriptor(legal.PRIVACY, creator.preferred_language),
+            },
             "tiktok": (
                 {
                     "display_name": account.display_name,
@@ -221,6 +226,14 @@ class ConsentView(APIView):
         serializer = ConsentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+
+        # الموافقة لا تُقبل إلا على النص المنشور فعلًا بنسخته وبصمته
+        language = data.get("language", "ar")
+        if data["terms_version"] != legal.version(legal.TERMS):
+            return error("نسخة الشروط غير حديثة", code="stale_terms_version")
+        if data["content_hash"] != legal.content_hash(legal.TERMS, language):
+            return error("بصمة نص الشروط لا تطابق النص المنشور", code="terms_hash_mismatch")
+
         consent = creator_services.record_consent(
             request.user.creator,
             terms_version=data["terms_version"],

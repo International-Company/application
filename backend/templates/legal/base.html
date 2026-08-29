@@ -1,0 +1,59 @@
+{% load static %}<!DOCTYPE html>
+<html lang="{{ language }}" dir="{{ direction }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #ffffff;
+    color: #111111;
+    font-family: "Segoe UI", Tahoma, "Noto Naskh Arabic", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.9;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 72px; }
+  header { border-bottom: 1px solid #e5e5e5; padding-bottom: 20px; margin-bottom: 28px; }
+  .bar { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  h1 { font-size: 28px; margin: 0 0 6px; font-weight: 700; }
+  h2 { font-size: 20px; margin: 32px 0 10px; font-weight: 700; }
+  .meta { color: #666666; font-size: 14px; }
+  a { color: #111111; }
+  .lang { font-size: 14px; text-decoration: none; border: 1px solid #d4d4d4; padding: 6px 14px; border-radius: 4px; }
+  .lang:hover { border-color: #111111; }
+  p, li { margin: 10px 0; }
+  ul { padding-inline-start: 22px; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 15px; }
+  th, td { border: 1px solid #e5e5e5; padding: 10px 12px; text-align: start; vertical-align: top; }
+  th { background: #fafafa; font-weight: 600; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #e5e5e5; font-size: 14px; color: #666666; }
+  footer a { margin-inline-end: 18px; }
+  .note { border-inline-start: 3px solid #111111; padding: 2px 0 2px 14px; padding-inline-start: 14px; margin: 18px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="bar">
+      <div>
+        <h1>{{ title }}</h1>
+        <div class="meta">{{ labels.version }} {{ version }}</div>
+      </div>
+      <a class="lang" href="?lang={{ other_language }}">{{ other_language_label }}</a>
+    </div>
+  </header>
+
+  <main>
+    {% include content_template %}
+  </main>
+
+  <footer>
+    <a href="{{ terms_url }}">{{ labels.terms }}</a>
+    <a href="{{ privacy_url }}">{{ labels.privacy }}</a>
+  </footer>
+</div>
+</body>
+</html>

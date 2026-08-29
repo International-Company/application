@@ -157,4 +157,5 @@ class CreatorProfileSerializer(serializers.Serializer):
     setup_completed = serializers.BooleanField()
     balance_egp = serializers.DecimalField(max_digits=18, decimal_places=4)
     tiktok = serializers.DictField(allow_null=True)
+    legal = serializers.DictField()
     recent_withdrawals = WithdrawalSerializer(many=True)
