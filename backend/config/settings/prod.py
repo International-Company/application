@@ -1,7 +1,22 @@
 """إعدادات الإنتاج."""
+from django.core.exceptions import ImproperlyConfigured
+
 from .base import *  # noqa: F401,F403
 
 DEBUG = False
+
+# في الإنتاج لا يجوز السقوط الصامت إلى قاعدة بيانات محلية: إما إعداد صريح أو توقف
+if not DATABASE_URL and DATABASES["default"]["HOST"] in ("localhost", "127.0.0.1", ""):  # noqa: F405
+    raise ImproperlyConfigured(
+        "قاعدة البيانات غير مضبوطة: اضبط DATABASE_URL أو DB_HOST في متغيرات البيئة. "
+        "على Railway اربط المتغير بخدمة Postgres عبر ${{Postgres.DATABASE_URL}}"
+    )
+
+if not FIELD_ENCRYPTION_KEY:  # noqa: F405
+    raise ImproperlyConfigured(
+        "FIELD_ENCRYPTION_KEY مطلوب في الإنتاج: 32 بايت بترميز base64. "
+        "فقدانه لاحقًا يعني فقدان كل توكنات TikTok."
+    )
 SECURE_SSL_REDIRECT = True
 # فحص الحياة يأتي من داخل الشبكة بلا ترويسة بروتوكول، فيُستثنى من التحويل إلى HTTPS
 SECURE_REDIRECT_EXEMPT = [r"^healthz$"]
