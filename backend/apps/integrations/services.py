@@ -12,11 +12,16 @@ from .tiktok import TikTokProvider, get_provider
 
 @transaction.atomic
 def link_tiktok_account(
-    code: str, *, provider: TikTokProvider | None = None, ip: str | None = None
+    code: str,
+    *,
+    provider: TikTokProvider | None = None,
+    ip: str | None = None,
+    redirect_uri: str = "",
+    code_verifier: str = "",
 ):
     """تبادل كود Login Kit وربطه بمبدع. يعيد (المبدع، الحساب، هل هو جديد)."""
     provider = provider or get_provider()
-    tokens = provider.exchange_code(code)
+    tokens = provider.exchange_code(code, redirect_uri=redirect_uri, code_verifier=code_verifier)
     profile = provider.fetch_profile(tokens.access_token)
 
     account = (

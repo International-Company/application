@@ -186,6 +186,7 @@ TIKTOK_PACKAGE_NAMES = env.list(
 TIKTOK_CLIENT_KEY = env("TIKTOK_CLIENT_KEY", default="")
 TIKTOK_CLIENT_SECRET = env("TIKTOK_CLIENT_SECRET", default="")
 TIKTOK_HTTP_TIMEOUT = env.int("TIKTOK_HTTP_TIMEOUT", default=15)
+TIKTOK_REDIRECT_URI = env("TIKTOK_REDIRECT_URI", default="")
 
 # --- المزوّدون الخارجيون: يُستبدل كل واحد بسطر في البيئة ---
 TIKTOK_PROVIDER = env("TIKTOK_PROVIDER", default="apps.integrations.tiktok.HttpTikTokProvider")

@@ -27,6 +27,9 @@ class TikTokExchangeSerializer(serializers.Serializer):
 
     code = serializers.CharField(max_length=512)
     device_id = serializers.CharField(max_length=128, required=False, allow_blank=True)
+    # مطلوب في تدفق PKCE على الهاتف — يولّده التطبيق ولا يعرفه الخادم مسبقًا
+    code_verifier = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    redirect_uri = serializers.CharField(max_length=300, required=False, allow_blank=True)
 
 
 class PhoneVerifySerializer(serializers.Serializer):

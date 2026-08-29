@@ -57,7 +57,9 @@ class TikTokProvider(ABC):
     """العقد الذي تعتمد عليه بقية المنصة."""
 
     @abstractmethod
-    def exchange_code(self, code: str, *, redirect_uri: str = "") -> TikTokTokens: ...
+    def exchange_code(
+        self, code: str, *, redirect_uri: str = "", code_verifier: str = ""
+    ) -> TikTokTokens: ...
 
     @abstractmethod
     def refresh(self, refresh_token: str) -> TikTokTokens: ...
@@ -99,10 +101,14 @@ class HttpTikTokProvider(TikTokProvider):
             scope=body.get("scope", ""),
         )
 
-    def exchange_code(self, code: str, *, redirect_uri: str = "") -> TikTokTokens:
+    def exchange_code(
+        self, code: str, *, redirect_uri: str = "", code_verifier: str = ""
+    ) -> TikTokTokens:
         data = {"code": code, "grant_type": "authorization_code"}
-        if redirect_uri:
-            data["redirect_uri"] = redirect_uri
+        # redirect_uri إلزامي، وcode_verifier إلزامي لتطبيقات الهاتف (PKCE)
+        data["redirect_uri"] = redirect_uri or settings.TIKTOK_REDIRECT_URI
+        if code_verifier:
+            data["code_verifier"] = code_verifier
         return self._post_token(data)
 
     def refresh(self, refresh_token: str) -> TikTokTokens:
@@ -150,8 +156,10 @@ class FakeTikTokProvider(TikTokProvider):
             scope="user.info.basic,user.info.profile,user.info.stats",
         )
 
-    def exchange_code(self, code: str, *, redirect_uri: str = "") -> TikTokTokens:
-        self.calls.append(("exchange_code", code))
+    def exchange_code(
+        self, code: str, *, redirect_uri: str = "", code_verifier: str = ""
+    ) -> TikTokTokens:
+        self.calls.append(("exchange_code", code, redirect_uri, code_verifier))
         if code == "invalid":
             raise TikTokError("كود غير صالح")
         return self.tokens or self._default_tokens()

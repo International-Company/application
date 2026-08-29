@@ -66,7 +66,10 @@ class TikTokExchangeView(APIView):
 
         try:
             creator, account, created = integration_services.link_tiktok_account(
-                data["code"], ip=client_ip(request)
+                data["code"],
+                ip=client_ip(request),
+                redirect_uri=data.get("redirect_uri", ""),
+                code_verifier=data.get("code_verifier", ""),
             )
         except TikTokError as exc:
             return error(str(exc), code="tiktok_error")
