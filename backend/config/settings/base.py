@@ -15,11 +15,23 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.
 
 # منصات الاستضافة تمنح نطاقًا عامًا وقت التشغيل — يُضاف تلقائيًا دون تعديل الإعدادات
 PUBLIC_DOMAIN = env("RAILWAY_PUBLIC_DOMAIN", default="") or env("PUBLIC_DOMAIN", default="")
-if PUBLIC_DOMAIN:
+if PUBLIC_DOMAIN and PUBLIC_DOMAIN not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(PUBLIC_DOMAIN)
 
+# على Railway يتغير النطاق مع كل بيئة، وفحص الحياة يأتي بترويسة مضيف خاصة به
+ON_RAILWAY = bool(
+    env("RAILWAY_ENVIRONMENT_NAME", default="") or env("RAILWAY_PROJECT_ID", default="")
+)
+if ON_RAILWAY:
+    for host in (".up.railway.app", "healthcheck.railway.app"):
+        if host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(host)
+
+# النقطة البادئة صيغة Django للنطاقات الفرعية، وCSRF يريدها بنجمة
 CSRF_TRUSTED_ORIGINS = [
-    f"https://{host}" for host in ALLOWED_HOSTS if host not in ("localhost", "127.0.0.1")
+    "https://" + (host.replace(".", "*.", 1) if host.startswith(".") else host)
+    for host in ALLOWED_HOSTS
+    if host not in ("localhost", "127.0.0.1")
 ]
 
 INSTALLED_APPS = [
