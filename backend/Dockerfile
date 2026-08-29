@@ -14,4 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# المنصة تحقن PORT وقت التشغيل؛ 8000 هو البديل محليًا
+ENV PORT=8000
+CMD ["sh", "-c", "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 60"]
