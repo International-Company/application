@@ -75,6 +75,9 @@ class WithdrawalRequest(TimestampedModel):
     approved_at = models.DateTimeField(null=True, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
     closed_at = models.DateTimeField(null=True, blank=True)
+    stale_prompt_sent_at = models.DateTimeField(
+        null=True, blank=True, help_text="وقت سؤال المبدع بعد مضي المهلة بلا إشارة"
+    )
     cancel_reason = models.CharField(max_length=200, blank=True)
     ledger_txn_id = models.UUIDField(null=True, blank=True, help_text="قيد الإيداع عند received_eg")
 
@@ -148,6 +151,7 @@ class SignalKind(models.TextChoices):
     SENT = "sent", "تم الإرسال"
     REJECTED = "rejected", "مرفوض"
     RECEIVED = "received", "وصل"
+    NOT_COMPLETED = "not_completed", "أفاد المبدع بعدم إتمام السحب"
 
 
 class WithdrawalSignal(TimestampedModel):

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework",
     # وحدات المنصة
     "apps.common",
+    "apps.api",
     "apps.identity",
     "apps.creators",
     "apps.integrations",
@@ -145,6 +146,61 @@ OWNER_CONFIRMATION_MAX_AMOUNT_USD = Decimal(
 )
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "apps.creators.authentication.CreatorJWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.ScopedRateThrottle",),
+    "DEFAULT_THROTTLE_RATES": {
+        "auth": env("THROTTLE_AUTH", default="10/min"),
+        "setup": env("THROTTLE_SETUP", default="30/hour"),
+        "withdrawal": env("THROTTLE_WITHDRAWAL", default="10/hour"),
+        "signal": env("THROTTLE_SIGNAL", default="120/hour"),
+    },
+    "UNAUTHENTICATED_USER": None,
+}
+
+# --- رموز المبدعين ---
+ACCESS_TOKEN_MINUTES = env.int("ACCESS_TOKEN_MINUTES", default=15)
+REFRESH_TOKEN_DAYS = env.int("REFRESH_TOKEN_DAYS", default=30)
+PREAUTH_TOKEN_MINUTES = env.int("PREAUTH_TOKEN_MINUTES", default=10)
+
+# --- تحقق الهاتف ---
+OTP_LENGTH = env.int("OTP_LENGTH", default=6)
+OTP_TTL_MINUTES = env.int("OTP_TTL_MINUTES", default=5)
+OTP_MAX_ATTEMPTS = env.int("OTP_MAX_ATTEMPTS", default=5)
+OTP_RESEND_SECONDS = env.int("OTP_RESEND_SECONDS", default=60)
+
+# --- قواعد السرعة على طلبات السحب ---
+MAX_WITHDRAWALS_PER_DAY = env.int("MAX_WITHDRAWALS_PER_DAY", default=3)
+MAX_WITHDRAWALS_PER_MONTH = env.int("MAX_WITHDRAWALS_PER_MONTH", default=30)
+REQUIRE_DEVICE_INTEGRITY = env.bool("REQUIRE_DEVICE_INTEGRITY", default=True)
+TOKEN_REFRESH_HORIZON_HOURS = env.int("TOKEN_REFRESH_HORIZON_HOURS", default=24)
+
+# --- حزم TikTok المعتمدة: أي إشعار من غيرها لا يُصدَّق ---
+TIKTOK_PACKAGE_NAMES = env.list(
+    "TIKTOK_PACKAGE_NAMES",
+    default=["com.zhiliaoapp.musically", "com.ss.android.ugc.trill"],
+)
+TIKTOK_CLIENT_KEY = env("TIKTOK_CLIENT_KEY", default="")
+TIKTOK_CLIENT_SECRET = env("TIKTOK_CLIENT_SECRET", default="")
+TIKTOK_HTTP_TIMEOUT = env.int("TIKTOK_HTTP_TIMEOUT", default=15)
+
+# --- المزوّدون الخارجيون: يُستبدل كل واحد بسطر في البيئة ---
+TIKTOK_PROVIDER = env("TIKTOK_PROVIDER", default="apps.integrations.tiktok.HttpTikTokProvider")
+SMS_SENDER = env("SMS_SENDER", default="apps.creators.sms.ConsoleSmsSender")
+PUSH_SENDER = env("PUSH_SENDER", default="apps.messaging.notifier.ConsolePushSender")
+INTEGRITY_VERIFIER = env(
+    "INTEGRITY_VERIFIER", default="apps.creators.integrity.PermissiveIntegrityVerifier"
+)
+
+# --- جدولة المهام الدورية ---
+CELERY_BEAT_SCHEDULE = {
+    "ask-creator-about-stale-requests": {
+        "task": "withdrawals.ask_creator_about_stale_requests",
+        "schedule": 300.0,
+    },
+    "flag-not-received": {"task": "withdrawals.flag_not_received", "schedule": 3600.0},
+    "refresh-tiktok-tokens": {"task": "integrations.refresh_tiktok_tokens", "schedule": 21600.0},
 }

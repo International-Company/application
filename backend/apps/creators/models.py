@@ -115,3 +115,49 @@ class KycCheck(TimestampedModel):
 
     class Meta:
         db_table = "kyc_checks"
+
+
+class PhoneVerification(TimestampedModel):
+    """رمز تحقق لمرة واحدة. يُخزَّن مجزَّأً لا نصًا صريحًا."""
+
+    phone = models.CharField(max_length=20, db_index=True)
+    code_hash = models.CharField(max_length=64)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    consumed_at = models.DateTimeField(null=True, blank=True)
+    creator = models.ForeignKey(
+        Creator, on_delete=models.CASCADE, null=True, blank=True, related_name="phone_verifications"
+    )
+
+    class Meta:
+        db_table = "phone_verifications"
+        indexes = [models.Index(fields=["phone", "created_at"])]
+
+    @property
+    def is_consumed(self) -> bool:
+        return self.consumed_at is not None
+
+
+class CreatorRefreshToken(TimestampedModel):
+    """رمز تجديد مربوط بجهاز واحد. يُخزَّن مجزَّأً ويُدوَّر عند كل استعمال."""
+
+    creator = models.ForeignKey(Creator, on_delete=models.CASCADE, related_name="refresh_tokens")
+    device = models.ForeignKey(
+        CreatorDevice, on_delete=models.CASCADE, related_name="refresh_tokens"
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField()
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    replaced_by = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="replaces"
+    )
+
+    class Meta:
+        db_table = "creator_refresh_tokens"
+        indexes = [models.Index(fields=["creator", "revoked_at"])]
+
+    @property
+    def is_active(self) -> bool:
+        from django.utils import timezone as _tz
+
+        return self.revoked_at is None and self.expires_at > _tz.now()
