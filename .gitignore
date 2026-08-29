@@ -1,0 +1,34 @@
+# بيئة بايثون
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# الأسرار — لا تُرفع أبدًا
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# مخرجات البناء والاختبار
+.pytest_cache/
+.ruff_cache/
+staticfiles/
+htmlcov/
+.coverage
+
+# node / أندرويد (للمراحل القادمة)
+node_modules/
+dist/
+build/
+*.apk
+*.keystore
+local.properties
+.gradle/
+
+# ملفات النظام والمحررات
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
