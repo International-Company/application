@@ -9,7 +9,8 @@ workflows:
       java: 17
       vars:
         API_BASE_URL: "https://application-production-2810.up.railway.app"
-        TIKTOK_SIGNATURES: ""
+        # بصمات توقيع TikTok تُضاف من تبويب Environment variables بعد رصدها
+        # على جهاز حقيقي. لا تُكتب هنا فارغة: Codemagic يرفض متغيّرًا بلا قيمة.
     scripts:
       - name: Prepare Gradle wrapper
         script: |
@@ -21,10 +22,12 @@ workflows:
       - name: Build debug APK
         script: |
           cd creator-app
-          ./gradlew clean assembleDebug \
-            -PapiBaseUrl="$API_BASE_URL" \
-            -PtiktokSignatures="$TIKTOK_SIGNATURES" \
-            --no-daemon --stacktrace
+          # البصمات اختيارية: بدونها لا يُصدَّق أي إشعار، وهو فشل مغلق مقصود
+          SIGNATURES_FLAG=""
+          if [ -n "${TIKTOK_SIGNATURES:-}" ]; then
+            SIGNATURES_FLAG="-PtiktokSignatures=$TIKTOK_SIGNATURES"
+          fi
+          ./gradlew clean assembleDebug -PapiBaseUrl="$API_BASE_URL" $SIGNATURES_FLAG --no-daemon --stacktrace
     artifacts:
       - creator-app/app/build/outputs/**/*.apk
     publishing:
