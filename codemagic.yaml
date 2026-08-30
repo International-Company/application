@@ -1,178 +1,59 @@
-# بناء تطبيقات أندرويد في السحابة عبر Codemagic.
-#
-# لماذا: بناء تطبيق أندرويد يحتاج SDK وGradle وJDK متوافقًا. هذا الملف ينقل
-# ذلك كله إلى السحابة، فيبني ويوقّع ويرسل ملف APK دون تثبيت شيء على جهازك.
-#
-# ملاحظة: غلاف Gradle (gradlew) غير مرفوع في المستودع، فيُولَّد في أول خطوة
-# من Gradle المثبَّت مسبقًا على آلة البناء.
-
-definitions:
-  env_versions: &env_versions
-    java: 17
-
-  cache_gradle: &cache_gradle
-    cache_paths:
-      - $HOME/.gradle/caches
-      - $HOME/.gradle/wrapper
-
 workflows:
 
-  # ------------------------------------------------------------------
   # تطبيق المبدع — نسخة تجربة قابلة للتثبيت مباشرة
-  # ------------------------------------------------------------------
   creator-debug:
-    name: تطبيق المبدع — نسخة تجربة
-    max_build_duration: 45
-    # آلة macOS هي المتاحة في الخطة المجانية، وتبني أندرويد بلا مشكلة
+    name: Creator app - debug APK
     instance_type: mac_mini_m2
+    max_build_duration: 45
     environment:
-      <<: *env_versions
+      java: 17
       vars:
-        # عنوان الخادم الذي سيتصل به التطبيق.
-        # للتجربة على هاتف حقيقي ضع عنوان خادمك المنشور.
         API_BASE_URL: "https://application-production-2810.up.railway.app"
-        # بصمات توقيع TikTok — تُملأ بعد رصدها من «أدوات المطوّر» على الجهاز.
-        # تُترك فارغة الآن، وحينها لا يُصدَّق أي إشعار (يفشل مغلقًا عمدًا).
         TIKTOK_SIGNATURES: ""
-    cache:
-      <<: *cache_gradle
     scripts:
-      - name: تجهيز غلاف Gradle
+      - name: Prepare Gradle wrapper
         script: |
           cd creator-app
           if [ ! -f gradlew ]; then
             gradle wrapper --gradle-version 8.11.1
           fi
           chmod +x gradlew
-
-      - name: قبول تراخيص Android SDK
-        script: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-
-      - name: بناء نسخة التجربة
+      - name: Build debug APK
         script: |
           cd creator-app
           ./gradlew clean assembleDebug \
             -PapiBaseUrl="$API_BASE_URL" \
             -PtiktokSignatures="$TIKTOK_SIGNATURES" \
             --no-daemon --stacktrace
-
     artifacts:
       - creator-app/app/build/outputs/**/*.apk
-      - creator-app/app/build/reports/**
-      - creator-app/build/reports/**
-
     publishing:
       email:
         recipients:
           - drdr3226@gmail.com
-        notify:
-          success: true
-          failure: true
 
-  # ------------------------------------------------------------------
-  # تطبيق المبدع — نسخة إنتاج موقّعة
-  # تحتاج رفع مفتاح التوقيع في Codemagic باسم creator_keystore
-  # ------------------------------------------------------------------
-  creator-release:
-    name: تطبيق المبدع — نسخة إنتاج
-    max_build_duration: 60
-    # آلة macOS هي المتاحة في الخطة المجانية، وتبني أندرويد بلا مشكلة
-    instance_type: mac_mini_m2
-    environment:
-      <<: *env_versions
-      android_signing:
-        - creator_keystore
-      vars:
-        API_BASE_URL: "https://application-production-2810.up.railway.app"
-        TIKTOK_SIGNATURES: ""
-    cache:
-      <<: *cache_gradle
-    scripts:
-      - name: تجهيز غلاف Gradle
-        script: |
-          cd creator-app
-          if [ ! -f gradlew ]; then
-            gradle wrapper --gradle-version 8.11.1
-          fi
-          chmod +x gradlew
-
-      - name: ربط مفتاح التوقيع
-        script: |
-          cd creator-app
-          cat >> app/build.gradle.kts <<'GRADLE'
-
-          // يُضاف وقت البناء في السحابة: مفتاح التوقيع لا يُخزَّن في المستودع
-          android {
-              signingConfigs {
-                  create("release") {
-                      storeFile = file(System.getenv("CM_KEYSTORE_PATH"))
-                      storePassword = System.getenv("CM_KEYSTORE_PASSWORD")
-                      keyAlias = System.getenv("CM_KEY_ALIAS")
-                      keyPassword = System.getenv("CM_KEY_PASSWORD")
-                  }
-              }
-              buildTypes {
-                  getByName("release") {
-                      signingConfig = signingConfigs.getByName("release")
-                  }
-              }
-          }
-          GRADLE
-
-      - name: بناء نسخة الإنتاج
-        script: |
-          cd creator-app
-          ./gradlew clean assembleRelease \
-            -PapiBaseUrl="$API_BASE_URL" \
-            -PtiktokSignatures="$TIKTOK_SIGNATURES" \
-            --no-daemon --stacktrace
-
-    artifacts:
-      - creator-app/app/build/outputs/**/*.apk
-      - creator-app/app/build/outputs/**/mapping.txt
-
-    publishing:
-      email:
-        recipients:
-          - drdr3226@gmail.com
-        notify:
-          success: true
-          failure: true
-
-  # ------------------------------------------------------------------
   # تطبيق الجامع — يُثبَّت على هاتف الشركة وحده
-  # ------------------------------------------------------------------
   collector-debug:
-    name: تطبيق الجامع — نسخة تجربة
-    max_build_duration: 45
-    # آلة macOS هي المتاحة في الخطة المجانية، وتبني أندرويد بلا مشكلة
+    name: Collector app - debug APK
     instance_type: mac_mini_m2
+    max_build_duration: 45
     environment:
-      <<: *env_versions
-    cache:
-      <<: *cache_gradle
+      java: 17
     scripts:
-      - name: تجهيز غلاف Gradle
+      - name: Prepare Gradle wrapper
         script: |
           cd collector-app
           if [ ! -f gradlew ]; then
             gradle wrapper --gradle-version 8.11.1
           fi
           chmod +x gradlew
-
-      - name: بناء تطبيق الجامع
+      - name: Build debug APK
         script: |
           cd collector-app
           ./gradlew clean assembleDebug --no-daemon --stacktrace
-
     artifacts:
       - collector-app/app/build/outputs/**/*.apk
-
     publishing:
       email:
         recipients:
           - drdr3226@gmail.com
-        notify:
-          success: true
-          failure: true
