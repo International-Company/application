@@ -27,3 +27,6 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 X_FRAME_OPTIONS = "DENY"
+
+# في الإنتاج لا يدخل مستخدم إدارة بلا تحقق ثنائي
+ADMIN_REQUIRE_TOTP = env.bool("ADMIN_REQUIRE_TOTP", default=True)  # noqa: F405

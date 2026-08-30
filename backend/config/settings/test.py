@@ -16,5 +16,6 @@ SMS_SENDER = "apps.creators.sms.ConsoleSmsSender"
 PUSH_SENDER = "apps.messaging.notifier.ConsolePushSender"
 INTEGRITY_VERIFIER = "apps.creators.integrity.PermissiveIntegrityVerifier"
 REST_FRAMEWORK = {**REST_FRAMEWORK, "DEFAULT_THROTTLE_RATES": {  # noqa: F405
-    "auth": "1000/min", "setup": "1000/min", "withdrawal": "1000/min", "signal": "1000/min",
+    "auth": "1000/min", "setup": "1000/min", "withdrawal": "1000/min",
+    "signal": "1000/min", "admin_auth": "1000/min",
 }}

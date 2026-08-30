@@ -158,6 +158,7 @@ REST_FRAMEWORK = {
         "setup": env("THROTTLE_SETUP", default="30/hour"),
         "withdrawal": env("THROTTLE_WITHDRAWAL", default="10/hour"),
         "signal": env("THROTTLE_SIGNAL", default="120/hour"),
+        "admin_auth": env("THROTTLE_ADMIN_AUTH", default="20/min"),
     },
     "UNAUTHENTICATED_USER": None,
 }
@@ -178,6 +179,11 @@ MAX_WITHDRAWALS_PER_DAY = env.int("MAX_WITHDRAWALS_PER_DAY", default=3)
 MAX_WITHDRAWALS_PER_MONTH = env.int("MAX_WITHDRAWALS_PER_MONTH", default=30)
 REQUIRE_DEVICE_INTEGRITY = env.bool("REQUIRE_DEVICE_INTEGRITY", default=True)
 TOKEN_REFRESH_HORIZON_HOURS = env.int("TOKEN_REFRESH_HORIZON_HOURS", default=24)
+
+# --- دخول الإدارة ---
+ADMIN_LOGIN_MAX_FAILURES = env.int("ADMIN_LOGIN_MAX_FAILURES", default=5)
+ADMIN_LOGIN_WINDOW_MINUTES = env.int("ADMIN_LOGIN_WINDOW_MINUTES", default=15)
+ADMIN_REQUIRE_TOTP = env.bool("ADMIN_REQUIRE_TOTP", default=False)
 
 # --- حزم TikTok المعتمدة: أي إشعار من غيرها لا يُصدَّق ---
 TIKTOK_PACKAGE_NAMES = env.list(

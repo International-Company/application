@@ -1,5 +1,5 @@
 """مسارات الإصدار v1 لتطبيق المبدع."""
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 
@@ -18,4 +18,5 @@ urlpatterns = [
     path("withdrawals/signals", views.WithdrawalSignalView.as_view(), name="withdrawal-signals"),
     path("withdrawals/<str:code>", views.WithdrawalDetailView.as_view(), name="withdrawal-detail"),
     path("health", views.HealthView.as_view(), name="health"),
+    path("admin/", include("apps.api.admin_urls")),
 ]
