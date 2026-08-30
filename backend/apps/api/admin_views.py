@@ -27,6 +27,7 @@ from apps.ledger.models import LedgerAccountType, LedgerEntry
 from apps.payouts.models import PayoutMethod
 from apps.payouts.services import execute_payout
 from apps.pricing import services as pricing
+from apps.pricing.models import FeeSchedule, FxRate
 from apps.receiving.models import AccountOwner, CreatorReceivingAssignment, ReceivingAccount
 from apps.withdrawals import state_machine as sm
 from apps.withdrawals.models import WithdrawalRequest, WithdrawalStatus
@@ -37,6 +38,8 @@ from .admin_serializers import (
     AdminLoginSerializer,
     AdminWithdrawalSerializer,
     AssignmentSerializer,
+    FeeScheduleSerializer,
+    FxRateSerializer,
     PayoutExecuteSerializer,
     ReceivingAccountSerializer,
     TotpConfirmSerializer,
@@ -608,3 +611,78 @@ class AdminReportsView(APIView):
                 "unbalanced_transactions": unbalanced,
             }
         )
+
+
+# --- الإعدادات: الرسوم وسعر الصرف -------------------------------------------
+
+class FeeScheduleView(APIView):
+    """GET/POST /api/v1/admin/fee-schedules."""
+
+    permission_classes = [IsAdminSession]
+
+    def get(self, request):
+        schedules = FeeSchedule.objects.all().order_by("-effective_from")
+        return Response(
+            {
+                "results": FeeScheduleSerializer(schedules, many=True).data,
+                "active": FeeScheduleSerializer(pricing.active_fee_schedule()).data
+                if pricing.active_fee_schedule()
+                else None,
+            }
+        )
+
+    def post(self, request):
+        if not require_role(request.user, FINANCE_ROLES):
+            return forbidden()
+        serializer = FeeScheduleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        schedule = serializer.save()
+        # جدول واحد فعّال في كل لحظة: ما سبقه يُغلق بوقت سريان الجديد
+        FeeSchedule.objects.filter(is_active=True, effective_to__isnull=True).exclude(
+            pk=schedule.pk
+        ).update(effective_to=schedule.effective_from, is_active=False)
+        audit.record(
+            action="admin.fee_schedule_created",
+            entity="fee_schedule",
+            entity_id=schedule.id,
+            actor_type=ActorType.ADMIN,
+            actor_id=request.user.id,
+            actor_label=request.user.email,
+            after=serializer.data,
+            ip=client_ip(request),
+        )
+        return Response(FeeScheduleSerializer(schedule).data, status=status.HTTP_201_CREATED)
+
+
+class FxRateView(APIView):
+    """GET/POST /api/v1/admin/fx-rates."""
+
+    permission_classes = [IsAdminSession]
+
+    def get(self, request):
+        rates = FxRate.objects.all().order_by("-effective_at")[:100]
+        latest = pricing.latest_fx_rate()
+        return Response(
+            {
+                "results": FxRateSerializer(rates, many=True).data,
+                "latest": FxRateSerializer(latest).data if latest else None,
+            }
+        )
+
+    def post(self, request):
+        if not require_role(request.user, FINANCE_ROLES):
+            return forbidden()
+        serializer = FxRateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rate = serializer.save()
+        audit.record(
+            action="admin.fx_rate_created",
+            entity="fx_rate",
+            entity_id=rate.id,
+            actor_type=ActorType.ADMIN,
+            actor_id=request.user.id,
+            actor_label=request.user.email,
+            after=serializer.data,
+            ip=client_ip(request),
+        )
+        return Response(FxRateSerializer(rate).data, status=status.HTTP_201_CREATED)

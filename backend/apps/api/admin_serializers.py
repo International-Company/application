@@ -1,7 +1,10 @@
 """مسلسِلات لوحة الإدارة."""
+from decimal import Decimal
+
 from rest_framework import serializers
 
 from apps.creators.models import Creator
+from apps.pricing.models import FeeSchedule, FxRate
 from apps.receiving.models import AccountOwner, ReceivingAccount
 from apps.withdrawals.models import WithdrawalRequest
 
@@ -201,3 +204,49 @@ class PayoutExecuteSerializer(serializers.Serializer):
     method_id = serializers.UUIDField()
     reference = serializers.CharField(max_length=120)
     destination = serializers.CharField(max_length=150, required=False, allow_blank=True)
+
+
+class FeeScheduleSerializer(serializers.ModelSerializer):
+    """جدول رسوم — يُنشأ ولا يُعدَّل بأثر رجعي على طلب قائم."""
+
+    percent = serializers.DecimalField(max_digits=6, decimal_places=4, min_value=Decimal("0"))
+    fixed_amount = serializers.DecimalField(
+        max_digits=18, decimal_places=4, min_value=Decimal("0"), required=False
+    )
+
+    class Meta:
+        model = FeeSchedule
+        fields = [
+            "id",
+            "name",
+            "percent",
+            "fixed_amount",
+            "currency",
+            "min_fee",
+            "max_fee",
+            "effective_from",
+            "effective_to",
+            "is_active",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class FxRateSerializer(serializers.ModelSerializer):
+    """سعر صرف في لحظة معيّنة."""
+
+    # الحارس في قاعدة البيانات آخر خط دفاع؛ الرفض هنا يعطي رسالة مفهومة
+    rate = serializers.DecimalField(max_digits=18, decimal_places=6, min_value=Decimal("0.000001"))
+
+    class Meta:
+        model = FxRate
+        fields = [
+            "id",
+            "base_currency",
+            "quote_currency",
+            "rate",
+            "source",
+            "effective_at",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]

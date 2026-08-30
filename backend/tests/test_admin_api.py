@@ -433,3 +433,55 @@ def test_server_time_is_returned_for_polling(admin):
 def test_withdrawal_not_found(admin):
     response = admin.get(reverse("api_v1:api_admin:withdrawal", args=["WD-00000"]))
     assert response.status_code == 404
+
+
+# --- الإعدادات: الرسوم وسعر الصرف -------------------------------------------
+
+def test_new_fee_schedule_closes_the_previous_one(admin, fee_schedule):
+    """جدول رسوم واحد فعّال في كل لحظة."""
+    response = admin.post(
+        reverse("api_v1:api_admin:fee-schedules"),
+        {
+            "name": "رسوم مخفّضة",
+            "percent": "3.0000",
+            "fixed_amount": "0",
+            "effective_from": timezone.now().isoformat(),
+            "is_active": True,
+        },
+        format="json",
+    )
+    assert response.status_code == 201
+    fee_schedule.refresh_from_db()
+    assert fee_schedule.is_active is False
+    assert fee_schedule.effective_to is not None
+
+    listing = admin.get(reverse("api_v1:api_admin:fee-schedules"))
+    assert listing.data["active"]["name"] == "رسوم مخفّضة"
+
+
+def test_viewer_cannot_change_fees(viewer):
+    response = viewer.post(
+        reverse("api_v1:api_admin:fee-schedules"),
+        {"name": "x", "percent": "1", "effective_from": timezone.now().isoformat()},
+        format="json",
+    )
+    assert response.status_code == 403
+
+
+def test_fx_rate_is_recorded_and_latest_is_returned(admin):
+    admin.post(
+        reverse("api_v1:api_admin:fx-rates"),
+        {"rate": "48.500000", "source": "manual", "effective_at": timezone.now().isoformat()},
+        format="json",
+    )
+    response = admin.get(reverse("api_v1:api_admin:fx-rates"))
+    assert response.data["latest"]["rate"] == "48.500000"
+
+
+def test_negative_fx_rate_is_rejected(admin):
+    response = admin.post(
+        reverse("api_v1:api_admin:fx-rates"),
+        {"rate": "-1", "source": "manual", "effective_at": timezone.now().isoformat()},
+        format="json",
+    )
+    assert response.status_code in (400, 500)

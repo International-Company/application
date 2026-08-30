@@ -24,5 +24,7 @@ urlpatterns = [
     path("withdrawals/<str:code>", v.AdminWithdrawalDetailView.as_view(), name="withdrawal"),
     path("payouts", v.AdminPayoutQueueView.as_view(), name="payouts"),
     path("payouts/<str:code>/execute", v.AdminPayoutExecuteView.as_view(), name="payout-execute"),
+    path("fee-schedules", v.FeeScheduleView.as_view(), name="fee-schedules"),
+    path("fx-rates", v.FxRateView.as_view(), name="fx-rates"),
     path("reports", v.AdminReportsView.as_view(), name="reports"),
 ]
