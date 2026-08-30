@@ -49,23 +49,26 @@ object PackageVerifier {
     /** بصمات توقيع حزمة — تُستعمل أيضًا لرصد البصمة الحقيقية أول مرة. */
     fun signatureDigests(context: Context, packageName: String): List<String> = runCatching {
         val manager = context.packageManager
-        val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val info = manager.getPackageInfo(
-                packageName,
-                PackageManager.GET_SIGNING_CERTIFICATES,
-            )
-            val signing = info.signingInfo ?: return@runCatching emptyList()
-            if (signing.hasMultipleSigners()) {
-                signing.apkContentsSigners
+        val signatures: List<android.content.pm.Signature> =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val info = manager.getPackageInfo(
+                    packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES,
+                )
+                val signing = info.signingInfo ?: return@runCatching emptyList()
+                val array = if (signing.hasMultipleSigners()) {
+                    signing.apkContentsSigners
+                } else {
+                    signing.signingCertificateHistory
+                }
+                array?.toList().orEmpty()
             } else {
-                signing.signingCertificateHistory
+                @Suppress("DEPRECATION")
+                manager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+                    .signatures?.toList().orEmpty()
             }
-        } else {
-            @Suppress("DEPRECATION")
-            manager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES).signatures
-        }
 
-        signatures.orEmpty().map { signature ->
+        signatures.map { signature ->
             MessageDigest.getInstance("SHA-256")
                 .digest(signature.toByteArray())
                 .joinToString("") { "%02X".format(it) }

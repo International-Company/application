@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -16,8 +18,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mobde3.creator.overlay.GuideOverlayService
@@ -71,7 +77,7 @@ class MainActivity : ComponentActivity() {
         var lastCode by remember { mutableStateOf("") }
 
         when (screen) {
-            Screen.WELCOME -> {
+            Screen.WELCOME -> Box(modifier = Modifier.fillMaxSize()) {
                 WelcomeScreen(
                     busy = state.busy,
                     error = state.error,
@@ -79,12 +85,13 @@ class MainActivity : ComponentActivity() {
                 )
                 // مدخل أدوات المطوّر: نسخة التطوير وحدها
                 if (BuildConfig.DEBUG) {
-                    androidx.compose.material3.TextButton(
+                    TextButton(
                         onClick = { screen = Screen.DEV_TOOLS },
-                        modifier = androidx.compose.ui.Modifier
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
-                    ) { androidx.compose.material3.Text("أدوات المطوّر") }
+                    ) { Text("أدوات المطوّر") }
                 }
             }
 
