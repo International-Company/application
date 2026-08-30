@@ -9,6 +9,9 @@ TIKTOK_PROVIDER = env(  # noqa: F405
 )
 SMS_SENDER = env("SMS_SENDER", default="apps.creators.sms.ConsoleSmsSender")  # noqa: F405
 PUSH_SENDER = env("PUSH_SENDER", default="apps.messaging.notifier.ConsolePushSender")  # noqa: F405
+WHATSAPP_CHANNEL = env(  # noqa: F405
+    "WHATSAPP_CHANNEL", default="apps.messaging.whatsapp.FakeWhatsAppChannel"
+)
 INTEGRITY_VERIFIER = env(  # noqa: F405
     "INTEGRITY_VERIFIER", default="apps.creators.integrity.PermissiveIntegrityVerifier"
 )

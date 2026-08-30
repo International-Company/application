@@ -3,6 +3,7 @@
 قاعدة مالية ثابتة: الانتقال إلى received_eg هو الوحيد الذي يُنشئ قيدًا دائنًا
 لرصيد المبدع. أي حالة أخرى لا تلمس الدفتر.
 """
+import logging
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -18,6 +19,8 @@ from apps.ledger.models import LedgerAccountType
 
 from .models import WithdrawalRequest
 from .models import WithdrawalStatus as S
+
+logger = logging.getLogger("mobde3.withdrawals")
 
 # الانتقالات المسموح بها فقط. ما ليس هنا مرفوض.
 ALLOWED: dict[str, set[str]] = {
@@ -103,7 +106,18 @@ def transition(
         before=before,
         after={"status": target, "evidence": evidence or {}},
     )
+    _announce(request, target)
     return request
+
+
+def _announce(request: WithdrawalRequest, target: str) -> None:
+    """إبلاغ الجانب المصري والإدارة. فشل الرسالة لا يُبطل انتقالًا ماليًا."""
+    from apps.messaging import services as messaging
+
+    try:
+        messaging.on_transition(request, target)
+    except Exception:  # noqa: BLE001 — قناة الرسائل ليست جزءًا من صحة القيد
+        logger.exception("تعذّر إبلاغ الجانب المصري بحالة %s للطلب %s", target, request.code)
 
 
 def _post_receipt_entry(request: WithdrawalRequest, *, amount_egp: Decimal | None, now) -> None:

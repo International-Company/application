@@ -185,6 +185,17 @@ ADMIN_LOGIN_MAX_FAILURES = env.int("ADMIN_LOGIN_MAX_FAILURES", default=5)
 ADMIN_LOGIN_WINDOW_MINUTES = env.int("ADMIN_LOGIN_WINDOW_MINUTES", default=15)
 ADMIN_REQUIRE_TOTP = env.bool("ADMIN_REQUIRE_TOTP", default=False)
 
+# --- قناة WhatsApp ---
+WHATSAPP_CHANNEL = env(
+    "WHATSAPP_CHANNEL", default="apps.messaging.whatsapp.CloudApiWhatsAppChannel"
+)
+WHATSAPP_PHONE_NUMBER_ID = env("WHATSAPP_PHONE_NUMBER_ID", default="")
+WHATSAPP_ACCESS_TOKEN = env("WHATSAPP_ACCESS_TOKEN", default="")
+WHATSAPP_APP_SECRET = env("WHATSAPP_APP_SECRET", default="")
+WHATSAPP_VERIFY_TOKEN = env("WHATSAPP_VERIFY_TOKEN", default="")
+WHATSAPP_HTTP_TIMEOUT = env.int("WHATSAPP_HTTP_TIMEOUT", default=15)
+ADMIN_WHATSAPP_NUMBERS = env.list("ADMIN_WHATSAPP_NUMBERS", default=[])
+
 # --- حزم TikTok المعتمدة: أي إشعار من غيرها لا يُصدَّق ---
 TIKTOK_PACKAGE_NAMES = env.list(
     "TIKTOK_PACKAGE_NAMES",
@@ -211,4 +222,5 @@ CELERY_BEAT_SCHEDULE = {
     },
     "flag-not-received": {"task": "withdrawals.flag_not_received", "schedule": 3600.0},
     "refresh-tiktok-tokens": {"task": "integrations.refresh_tiktok_tokens", "schedule": 21600.0},
+    "retry-failed-messages": {"task": "messaging.retry_failed_messages", "schedule": 900.0},
 }
