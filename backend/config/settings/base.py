@@ -142,6 +142,10 @@ RECONCILIATION_AMOUNT_TOLERANCE = Decimal(
     str(env.float("RECONCILIATION_AMOUNT_TOLERANCE", default=0.03))
 )
 RECONCILIATION_MIN_CONFIDENCE = Decimal("0.9")
+# نافذة وصول التحويل من لحظة إرسال TikTok
+RECONCILIATION_MAX_DAYS = env.int("RECONCILIATION_MAX_DAYS", default=4)
+# فارق الساعة المسموح به في توقيع تطبيق الجامع، لمنع إعادة البث
+COLLECTOR_MAX_SKEW_SECONDS = env.int("COLLECTOR_MAX_SKEW_SECONDS", default=300)
 OWNER_CONFIRMATION_MAX_AMOUNT_USD = Decimal(
     str(env.float("OWNER_CONFIRMATION_MAX_AMOUNT_USD", default=100))
 )

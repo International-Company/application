@@ -1,9 +1,41 @@
 """الوارد البنكي ومطابقته بطلبات السحب."""
 from django.db import models
 
+from apps.common.fields import EncryptedTextField
 from apps.common.models import TimestampedModel
 from apps.receiving.models import ReceivingAccount
 from apps.withdrawals.models import WithdrawalRequest
+
+
+class CollectorDevice(TimestampedModel):
+    """هاتف الشركة الذي يقرأ رسائل البنك ويرسلها موقّعة.
+
+    لكل جهاز سرّ خاص: تسريب سرّ جهاز لا يمكّن من انتحال غيره، وإيقافه يقطعه وحده.
+    """
+
+    name = models.CharField(max_length=100)
+    collector_id = models.CharField(max_length=64, unique=True)
+    secret_enc = EncryptedTextField()
+    is_active = models.BooleanField(default=True, db_index=True)
+    last_seen_at = models.DateTimeField(null=True, blank=True)
+    notes = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        db_table = "collector_devices"
+        verbose_name = "جهاز جامع"
+        verbose_name_plural = "أجهزة الجامع"
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.collector_id})"
+
+
+class MatchStatus(models.TextChoices):
+    """أين وصل التحويل في مسار المطابقة."""
+
+    UNMATCHED = "unmatched", "بلا مطابقة"
+    MATCHED = "matched", "مطابَق"
+    AMBIGUOUS = "ambiguous", "أكثر من مرشح"
+    IGNORED = "ignored", "مُستبعَد"
 
 
 class TransferSource(models.TextChoices):
@@ -35,6 +67,19 @@ class IncomingTransfer(TimestampedModel):
         blank=True,
     )
     matched_at = models.DateTimeField(null=True, blank=True)
+    match_status = models.CharField(
+        max_length=12,
+        choices=MatchStatus.choices,
+        default=MatchStatus.UNMATCHED,
+        db_index=True,
+    )
+    collector = models.ForeignKey(
+        CollectorDevice,
+        on_delete=models.PROTECT,
+        related_name="transfers",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = "incoming_transfers"
@@ -68,6 +113,7 @@ class MatchMethod(models.TextChoices):
 class MatchDecider(models.TextChoices):
     AUTO = "auto", "آلي"
     OWNER = "owner", "صاحب الحساب"
+    CREATOR = "creator", "المبدع"
     ADMIN = "admin", "إدارة"
 
 

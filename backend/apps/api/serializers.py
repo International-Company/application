@@ -19,6 +19,8 @@ CREATOR_ALLOWED_KINDS = [
     SignalKind.SENT,
     SignalKind.REJECTED,
     SignalKind.NOT_COMPLETED,
+    # مطالبة بتحويل متنازع عليه فقط؛ لا تُقيّد مالًا بذاتها
+    SignalKind.RECEIVED,
 ]
 
 

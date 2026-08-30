@@ -132,6 +132,13 @@ def ingest_signal(
     if existing is not None:
         return existing
 
+    # مطالبة بتحويل متنازع عليه: تحسم صاحبه ولا تُنشئ مالًا بذاتها
+    transfer_id = payload.get("transfer_id")
+    if source == SignalSource.MANUAL and kind == SignalKind.RECEIVED and transfer_id:
+        from apps.reconciliation import services as reconciliation
+
+        reconciliation.claim_transfer(creator, str(transfer_id))
+
     request = _resolve_request(creator, code)
     signal = WithdrawalSignal.objects.create(
         request=request,

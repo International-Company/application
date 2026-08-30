@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">جامع التحويلات</string>
+    <string name="base_url">عنوان الخادم</string>
+    <string name="collector_id">معرّف الجهاز</string>
+    <string name="secret">سرّ الجهاز</string>
+    <string name="account">حساب الاستلام</string>
+    <string name="senders">مرسِلو البنك المسموح بهم (مفصولون بفاصلة)</string>
+    <string name="save">حفظ</string>
+    <string name="saved">حُفظت الإعدادات</string>
+    <string name="grant_sms">منح إذن الرسائل</string>
+    <string name="grant_notifications">منح الوصول للإشعارات</string>
+    <string name="ready">الجهاز مُهيَّأ</string>
+    <string name="not_ready">الإعدادات غير مكتملة</string>
+    <string name="sms_permission">إذن الرسائل</string>
+    <string name="granted">ممنوح</string>
+    <string name="missing">ناقص</string>
+    <string name="secret_hint">اتركه فارغًا للإبقاء على السرّ الحالي</string>
+</resources>

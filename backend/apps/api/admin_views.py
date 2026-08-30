@@ -686,3 +686,117 @@ class FxRateView(APIView):
             ip=client_ip(request),
         )
         return Response(FxRateSerializer(rate).data, status=status.HTTP_201_CREATED)
+
+
+# --- الوارد البنكي والمطابقة ------------------------------------------------
+
+class AdminTransferListView(APIView):
+    """GET /api/v1/admin/transfers — الوارد ومطابقته."""
+
+    permission_classes = [IsAdminSession]
+
+    def get(self, request):
+        from apps.reconciliation.models import IncomingTransfer
+
+        transfers = (
+            IncomingTransfer.objects.select_related("receiving_account", "matched_request")
+            .order_by("-received_at")
+        )
+        match_status = request.query_params.get("match_status")
+        if match_status:
+            transfers = transfers.filter(match_status=match_status)
+
+        return Response(
+            {
+                "results": [
+                    {
+                        "id": str(item.id),
+                        "amount_egp": str(item.amount_egp),
+                        "received_at": item.received_at,
+                        "bank_ref": item.bank_ref,
+                        "sender_hint": item.sender_hint,
+                        "source": item.source,
+                        "account": str(item.receiving_account),
+                        "match_status": item.match_status,
+                        "matched_request": (
+                            item.matched_request.code if item.matched_request_id else None
+                        ),
+                    }
+                    for item in transfers[:300]
+                ],
+                "counts": {
+                    row["match_status"]: row["n"]
+                    for row in IncomingTransfer.objects.values("match_status").annotate(
+                        n=Count("id")
+                    )
+                },
+            }
+        )
+
+
+class AdminTransferMatchView(APIView):
+    """POST /api/v1/admin/transfers/{id}/match — حسم مطابقة يدويًا."""
+
+    permission_classes = [IsAdminSession]
+
+    def post(self, request, pk):
+        if not require_role(request.user, FINANCE_ROLES):
+            return forbidden()
+
+        from apps.reconciliation import services as reconciliation
+        from apps.reconciliation.models import IncomingTransfer
+
+        transfer = IncomingTransfer.objects.filter(pk=pk).first()
+        if transfer is None:
+            return error("غير موجود", code="not_found", http_status=status.HTTP_404_NOT_FOUND)
+
+        code = request.data.get("code", "")
+        withdrawal = WithdrawalRequest.objects.filter(code=code).first()
+        if withdrawal is None:
+            return error(
+                "الطلب غير موجود", code="not_found", http_status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            reconciliation.match_manually(transfer, withdrawal, admin=request.user)
+        except DomainError as exc:
+            return error(str(exc), code="match_rejected")
+
+        transfer.refresh_from_db()
+        return Response(
+            {
+                "matched": True,
+                "transfer_id": str(transfer.id),
+                "request": withdrawal.code,
+                "match_status": transfer.match_status,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class AdminTransferCandidatesView(APIView):
+    """GET /api/v1/admin/transfers/{id}/candidates — مرشحو تحويل متعارض."""
+
+    permission_classes = [IsAdminSession]
+
+    def get(self, request, pk):
+        from apps.reconciliation import services as reconciliation
+        from apps.reconciliation.models import IncomingTransfer
+
+        transfer = IncomingTransfer.objects.filter(pk=pk).first()
+        if transfer is None:
+            return error("غير موجود", code="not_found", http_status=status.HTTP_404_NOT_FOUND)
+
+        return Response(
+            [
+                {
+                    "code": candidate.request.code,
+                    "creator": candidate.request.creator.display_name,
+                    "amount_usd": str(candidate.request.amount_usd),
+                    "expected_egp": str(candidate.expected_egp),
+                    "method": candidate.method,
+                    "confidence": str(candidate.confidence),
+                }
+                for candidate in reconciliation.find_candidates(transfer)
+            ]
+        )

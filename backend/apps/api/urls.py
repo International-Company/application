@@ -1,7 +1,7 @@
 """مسارات الإصدار v1 لتطبيق المبدع."""
 from django.urls import include, path
 
-from . import views, webhook_views
+from . import collector_views, views, webhook_views
 
 app_name = "api_v1"
 
@@ -18,6 +18,11 @@ urlpatterns = [
     path("withdrawals/signals", views.WithdrawalSignalView.as_view(), name="withdrawal-signals"),
     path("withdrawals/<str:code>", views.WithdrawalDetailView.as_view(), name="withdrawal-detail"),
     path("health", views.HealthView.as_view(), name="health"),
+    path(
+        "reconciliation/incoming",
+        collector_views.IncomingTransferView.as_view(),
+        name="collector-incoming",
+    ),
     path(
         "webhooks/whatsapp",
         webhook_views.WhatsAppWebhookView.as_view(),

@@ -78,3 +78,18 @@ def request_initiated(db, creator, receiving_account, assignment) -> WithdrawalR
         fee_egp=Decimal("242.5000"),
         initiated_at=timezone.now(),
     )
+
+
+@pytest.fixture
+def admin_client(db):
+    """عميل إدارة بدور مالية — لأفعال المطابقة والدفع."""
+    from rest_framework.test import APIClient
+
+    from apps.identity.models import AdminRole, AdminUser
+
+    user = AdminUser.objects.create_user(
+        "recon@example.com", "pass-1234-secret", role=AdminRole.FINANCE, is_staff=True
+    )
+    api = APIClient()
+    api.force_authenticate(user=user)
+    return api

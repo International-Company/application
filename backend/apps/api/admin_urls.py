@@ -26,5 +26,12 @@ urlpatterns = [
     path("payouts/<str:code>/execute", v.AdminPayoutExecuteView.as_view(), name="payout-execute"),
     path("fee-schedules", v.FeeScheduleView.as_view(), name="fee-schedules"),
     path("fx-rates", v.FxRateView.as_view(), name="fx-rates"),
+    path("transfers", v.AdminTransferListView.as_view(), name="transfers"),
+    path("transfers/<uuid:pk>/match", v.AdminTransferMatchView.as_view(), name="transfer-match"),
+    path(
+        "transfers/<uuid:pk>/candidates",
+        v.AdminTransferCandidatesView.as_view(),
+        name="transfer-candidates",
+    ),
     path("reports", v.AdminReportsView.as_view(), name="reports"),
 ]
