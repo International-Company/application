@@ -1,8 +1,11 @@
 """إرسال رسائل SMS — خلف واجهة لأن المزوّد لم يُحسم بعد."""
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from django.conf import settings
+
+logger = logging.getLogger("mobde3.sms")
 
 
 class SmsSender(ABC):
@@ -21,6 +24,7 @@ class ConsoleSmsSender(SmsSender):
 
     def send(self, phone: str, body: str) -> str:
         self.sent.append((phone, body))
+        logger.info("SMS إلى %s: %s", phone, body)
         return f"console-{len(self.sent)}"
 
 

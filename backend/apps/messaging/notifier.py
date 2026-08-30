@@ -1,4 +1,5 @@
 """إشعارات المبدع عبر FCM — خلف واجهة، وكل رسالة تُسجَّل في جدول messages."""
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
@@ -6,6 +7,8 @@ from django.conf import settings
 from django.utils import timezone
 
 from .models import Channel, Message, MessageStatus
+
+logger = logging.getLogger("mobde3.push")
 
 
 class PushSender(ABC):
@@ -23,6 +26,7 @@ class ConsolePushSender(PushSender):
 
     def send(self, token: str, title: str, body: str, data: dict | None = None) -> str:
         self.sent.append({"token": token, "title": title, "body": body, "data": data or {}})
+        logger.info("إشعار: %s — %s", title, body)
         return f"console-push-{len(self.sent)}"
 
 
