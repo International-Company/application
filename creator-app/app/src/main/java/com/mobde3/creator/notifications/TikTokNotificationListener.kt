@@ -27,17 +27,22 @@ class TikTokNotificationListener : NotificationListenerService() {
         val packageName = notification.packageName
         if (!PackageVerifier.isTikTokPackage(packageName)) return
 
-        val session = SessionStore(applicationContext)
-        if (!session.isSignedIn) return
-
         val extras = notification.notification.extras
         val title = extras.getCharSequence("android.title")?.toString().orEmpty()
         val text = extras.getCharSequence("android.text")?.toString().orEmpty()
         val body = listOf(title, text).filter { it.isNotBlank() }.joinToString(" — ")
         if (body.isBlank()) return
 
-        val parsed = TikTokNotificationParser.parse(body) ?: return
+        val parsed = TikTokNotificationParser.parse(body)
         val signatureOk = PackageVerifier.isSignatureTrusted(applicationContext, packageName)
+
+        // في نسخة التطوير يُرصد النص الحرفي حتى لو لم يُفهم، لأنه هو المطلوب رصده
+        ProbeLog.record(applicationContext, packageName, body, parsed?.kind ?: "غير مفهوم", signatureOk)
+
+        if (parsed == null) return
+
+        val session = SessionStore(applicationContext)
+        if (!session.isSignedIn) return
 
         scope.launch {
             runCatching {

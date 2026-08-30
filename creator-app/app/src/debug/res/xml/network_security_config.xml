@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- عناوين التطوير المحلي وحدها تُستثنى من إلزام TLS -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- عنوان جهاز التطوير كما يراه محاكي أندرويد -->
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <!-- شبكة محلية للتجربة على هاتف حقيقي -->
+        <domain includeSubdomains="true">192.168.1.1</domain>
+    </domain-config>
+</network-security-config>

@@ -110,6 +110,47 @@ class CreatorViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * دخول تجريبي بلا SDK — **نسخة التطوير وحدها**.
+     *
+     * يمر بنفس مسارات الخادم الحقيقية: تبادل الكود ثم تحقق الهاتف. الفرق
+     * الوحيد أن خادم التطوير يستعمل مزوّد TikTok المزيّف، فيقبل أي كود.
+     */
+    fun devSignIn(phone: String, code: String, onResult: (String) -> Unit) {
+        if (!com.mobde3.creator.BuildConfig.DEBUG) {
+            onResult("غير متاح في نسخة الإنتاج")
+            return
+        }
+        viewModelScope.launch {
+            val outcome = runCatching {
+                withContext(Dispatchers.IO) {
+                    val exchange = api.exchangeTikTokCode("dev-code", "dev-verifier", session.deviceId)
+                    val preauth = exchange.optString("preauth_token")
+                    if (preauth.isBlank()) return@withContext "الحساب مربوط بالفعل — أعد التشغيل"
+
+                    if (code.isBlank()) {
+                        api.verifyPhone(preauth, phone)
+                        "أُرسل الرمز؛ اقرأه من سجل الخادم"
+                    } else {
+                        val result = api.verifyPhone(preauth, phone, code, session.deviceId)
+                        val sessionJson = result.optJSONObject("session")
+                            ?: return@withContext "لم تصدر جلسة"
+                        session.save(sessionJson)
+                        api.registerDevice(
+                            deviceId = session.deviceId,
+                            integrityToken = "dev-integrity-token",
+                            fcmToken = "",
+                            permissions = emptyMap(),
+                        )
+                        "تم الدخول"
+                    }
+                }
+            }
+            onResult(outcome.getOrElse { messageOf(it) })
+            refresh()
+        }
+    }
+
     fun signOut() {
         session.clear()
         _state.value = HomeState(loading = false)

@@ -16,10 +16,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.mobde3.creator.overlay.GuideOverlayService
 import com.mobde3.creator.setup.TikTokLauncher
 import com.mobde3.creator.ui.AfterWithdrawScreen
+import com.mobde3.creator.ui.DevToolsScreen
 import com.mobde3.creator.ui.CreatorViewModel
 import com.mobde3.creator.ui.HomeScreen
 import com.mobde3.creator.ui.PermissionsScreen
@@ -67,10 +71,31 @@ class MainActivity : ComponentActivity() {
         var lastCode by remember { mutableStateOf("") }
 
         when (screen) {
-            Screen.WELCOME -> WelcomeScreen(
-                busy = state.busy,
-                error = state.error,
-                onStart = { startTikTokLink() },
+            Screen.WELCOME -> {
+                WelcomeScreen(
+                    busy = state.busy,
+                    error = state.error,
+                    onStart = { startTikTokLink() },
+                )
+                // مدخل أدوات المطوّر: نسخة التطوير وحدها
+                if (BuildConfig.DEBUG) {
+                    androidx.compose.material3.TextButton(
+                        onClick = { screen = Screen.DEV_TOOLS },
+                        modifier = androidx.compose.ui.Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                    ) { androidx.compose.material3.Text("أدوات المطوّر") }
+                }
+            }
+
+            Screen.DEV_TOOLS -> DevToolsScreen(
+                onDevSignIn = { phone, code, onResult ->
+                    viewModel.devSignIn(phone, code) { message ->
+                        onResult(message)
+                        if (message == "تم الدخول") screen = Screen.PERMISSIONS
+                    }
+                },
+                onBack = { screen = Screen.WELCOME },
             )
 
             Screen.PERMISSIONS -> PermissionsScreen(
@@ -113,7 +138,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private enum class Screen { WELCOME, PERMISSIONS, SETUP, HOME, AFTER_WITHDRAW }
+    private enum class Screen { WELCOME, DEV_TOOLS, PERMISSIONS, SETUP, HOME, AFTER_WITHDRAW }
 
     /**
      * ربط TikTok.
