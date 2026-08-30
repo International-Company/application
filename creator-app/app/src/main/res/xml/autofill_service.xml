@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  خدمة التعبئة لا تعمل إلا داخل حزم TikTok. الحصر منفَّذ في الكود أيضًا:
+  أي طلب من حزمة أخرى يُردّ فارغًا قبل قراءة أي حقل.
+-->
+<autofill-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.mobde3.creator.MainActivity" />

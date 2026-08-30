@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- بطاقة الإرشاد: نص وزر إغلاق فقط. لا تقرأ الشاشة ولا تعترض اللمس. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FFFFFFFF"
+    android:elevation="8dp"
+    android:padding="16dp"
+    android:layout_margin="12dp">
+
+    <TextView
+        android:id="@+id/guideTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#111111" />
+
+    <TextView
+        android:id="@+id/guideBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="6dp"
+        android:textSize="16sp"
+        android:textColor="#555555" />
+
+    <Button
+        android:id="@+id/guideDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="@string/hide_guide" />
+</LinearLayout>

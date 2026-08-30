@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">المبدع</string>
+
+    <string name="welcome_title">اسحب أرباحك بضغطة</string>
+    <string name="welcome_body">اربط حسابك على TikTok مرة واحدة، ثم اسحب متى شئت. لن تكتب شيئًا.</string>
+    <string name="start_with_tiktok">ابدأ بحساب TikTok</string>
+
+    <string name="permissions_title">تفعيل التجهيز التلقائي</string>
+    <string name="perm_notifications">الوصول للإشعارات</string>
+    <string name="perm_notifications_why">لنعرف أن سحبك بدأ ووصل. نقرأ إشعارات TikTok وحدها.</string>
+    <string name="perm_overlay">العرض فوق التطبيقات</string>
+    <string name="perm_overlay_why">لعرض بطاقة الخطوات فوق TikTok. لا نقرأ شاشتك.</string>
+    <string name="perm_autofill">التعبئة التلقائية</string>
+    <string name="perm_autofill_why">لملء بيانات الاستلام داخل TikTok دون كتابة منك.</string>
+    <string name="enable_assistant">تفعيل</string>
+    <string name="later">لاحقًا</string>
+
+    <string name="setup_title">جهّز TikTok مرة واحدة</string>
+    <string name="setup_body">سنفتح TikTok، وستظهر بطاقة تقودك خطوة بخطوة. عند لمس الخانة اختر «تعبئة تلقائية» ثم احفظ.</string>
+    <string name="prepare_tiktok">جهّز TikTok</string>
+    <string name="setup_done">أتممت التجهيز</string>
+
+    <string name="balance">رصيدك</string>
+    <string name="egp">ج.م</string>
+    <string name="withdraw">سحب</string>
+    <string name="recent_requests">آخر الطلبات</string>
+    <string name="support">تواصل معنا</string>
+    <string name="support_whatsapp">201000000000</string>
+    <string name="support_message">مرحبًا، بخصوص الطلب %1$s</string>
+
+    <string name="withdraw_started">فتحنا TikTok لك</string>
+    <string name="withdraw_instructions">اضغط «سحب» ثم «تأكيد» داخل TikTok. بعدها ينتهي دورك، وسنتابع الباقي ونخبرك.</string>
+    <string name="back_home">عودة</string>
+
+    <string name="guide_setup_title">أضف وسيلة الاستلام</string>
+    <string name="guide_setup_body">الملف الشخصي ← الإعدادات ← الرصيد ← إضافة وسيلة دفع، ثم المس أول خانة واختر «تعبئة تلقائية».</string>
+    <string name="guide_withdraw_title">اضغط سحب</string>
+    <string name="guide_withdraw_body">الملف الشخصي ← الرصيد ← سحب ← تأكيد.</string>
+    <string name="hide_guide">إخفاء</string>
+
+    <string name="autofill_dataset_label">بيانات الاستلام</string>
+    <string name="tiktok_not_installed">تطبيق TikTok غير مثبَّت على هذا الجهاز</string>
+</resources>

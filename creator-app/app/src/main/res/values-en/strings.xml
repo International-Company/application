@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Creator</string>
+
+    <string name="welcome_title">Withdraw your earnings with one tap</string>
+    <string name="welcome_body">Link your TikTok account once, then withdraw whenever you like. You will never type anything.</string>
+    <string name="start_with_tiktok">Start with TikTok</string>
+
+    <string name="permissions_title">Enable automatic setup</string>
+    <string name="perm_notifications">Notification access</string>
+    <string name="perm_notifications_why">So we know your withdrawal started and arrived. We read TikTok notifications only.</string>
+    <string name="perm_overlay">Display over other apps</string>
+    <string name="perm_overlay_why">To show a step card above TikTok. We do not read your screen.</string>
+    <string name="perm_autofill">Autofill</string>
+    <string name="perm_autofill_why">To fill the receiving details inside TikTok without you typing.</string>
+    <string name="enable_assistant">Enable</string>
+    <string name="later">Later</string>
+
+    <string name="setup_title">Set up TikTok once</string>
+    <string name="setup_body">We will open TikTok and a card will guide you step by step. Tap the first field, choose Autofill, then save.</string>
+    <string name="prepare_tiktok">Set up TikTok</string>
+    <string name="setup_done">I finished the setup</string>
+
+    <string name="balance">Your balance</string>
+    <string name="egp">EGP</string>
+    <string name="withdraw">Withdraw</string>
+    <string name="recent_requests">Recent requests</string>
+    <string name="support">Contact us</string>
+    <string name="support_message">Hello, regarding request %1$s</string>
+
+    <string name="withdraw_started">We opened TikTok for you</string>
+    <string name="withdraw_instructions">Tap Withdraw then Confirm inside TikTok. Your part is done; we handle the rest and keep you posted.</string>
+    <string name="back_home">Back</string>
+
+    <string name="guide_setup_title">Add your payout method</string>
+    <string name="guide_setup_body">Profile → Settings → Balance → Add payment method, then tap the first field and choose Autofill.</string>
+    <string name="guide_withdraw_title">Tap Withdraw</string>
+    <string name="guide_withdraw_body">Profile → Balance → Withdraw → Confirm.</string>
+    <string name="hide_guide">Hide</string>
+
+    <string name="autofill_dataset_label">Receiving details</string>
+    <string name="tiktok_not_installed">TikTok is not installed on this device</string>
+</resources>
